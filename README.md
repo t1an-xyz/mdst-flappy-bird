@@ -4,4 +4,4 @@ This repository is starting with the code from [Coding Challenge #31 on YouTube]
 
 Coding Train themed graphics are welcome! (But keep it simple!)
 
-* [Play the game!](https://codingtrain.github.io/Flappy-Bird-Clone/)
+- [Play the game!](https://codingtrain.github.io/Flappy-Bird-Clone/)
