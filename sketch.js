@@ -12,11 +12,6 @@
 var parallax = 0.8;
 var score = 0;
 var maxScore = 0;
-var birdSprite;
-var pipeBodySprite;
-var pipePeakSprite;
-var bgImg;
-var bgX;
 var gameoverFrame = 0;
 var isOver = false;
 
@@ -41,34 +36,118 @@ let birds = [];
 let savedBirds = [];
 let pipes = [];
 
+// Challenge mode
+let birdbrain = null;
+let aibird = null;
+let playerbird = null;
+
+let challengemode = false;
+
+let c1, c2;
+let scroll = 0;
+
 function preload() {
-  pipeBodySprite = loadImage("graphics/pipe_body.png");
-  pipePeakSprite = loadImage("graphics/pipe_tip.png");
-  birdSprite = loadImage("graphics/icon.png");
-  bgImg = loadImage("graphics/background.png");
+  brainJSON = loadJSON("bird.json");
 }
 
 function setup() {
-  let canvas = createCanvas(800, 500);
+  let canvas = createCanvas(600, 500);
   canvas.parent("canvascontainer");
 
-  // Access the interface elements
+  // Check if challenge mode
+  challengeCheckbox = select("#challenge-checkbox");
   speedSlider = select("#speedSlider");
   speedSpan = select("#speed");
   highScoreSpan = select("#hs");
   allTimeHighScoreSpan = select("#ahs");
-  // runBestButton = select("#best");
-  // runBestButton.mousePressed(toggleState);
+  // Access the interface elements
+
+  birdbrain = NeuralNetwork.deserialize(brainJSON);
+
+  c1 = color(52, 197, 162);
+  c2 = color(137, 106, 228);
 
   for (let i = 0; i < POP_TOTAL; ++i) {
     birds[i] = new Bird();
   }
+
+  reset();
+}
+
+// Callback function for when checkbox/button pressed
+function challenge() {
+  console.log("CHALLENGE TOGGLED");
+
+  if (challengeCheckbox.checked()) {
+    savedBirds = [];
+    birds = [];
+  } else {
+    for (let i = 0; i < POP_TOTAL; ++i) {
+      birds[i] = new Bird();
+    }
+  }
+  challengemode = challengeCheckbox.checked();
   reset();
 }
 
 function draw() {
-  let cycles = speedSlider.value();
-  speedSpan.html(cycles);
+  if (challengeCheckbox.checked()) {
+    startChallenge(1);
+  } else {
+    let cycles = speedSlider.value();
+    speedSpan.html(cycles);
+    startChallenge(cycles);
+
+    let tempHighScore = 0;
+
+    // Which is the best bird?
+    let tempBestBird = null;
+    for (let i = 0; i < birds.length; i++) {
+      let s = birds[i].score;
+      if (s > tempHighScore) {
+        tempHighScore = s;
+        tempBestBird = birds[i];
+      }
+    }
+
+    // Is it the all time high scorer?
+    if (tempHighScore > highScore) {
+      highScore = tempHighScore;
+      bestBird = tempBestBird;
+    }
+    // Update DOM Elements
+    highScoreSpan.html(tempHighScore);
+    allTimeHighScoreSpan.html(highScore);
+
+    numBirds = birds.length;
+  }
+
+  drawBackground();
+  drawSinusoidalPattern();
+
+  scroll += 2;
+
+  for (let bird of birds) {
+    bird.show();
+  }
+  if (challengeCheckbox.checked()) {
+    aibird.show();
+    playerbird.show();
+  }
+  for (let pipe of pipes) {
+    pipe.show();
+  }
+}
+
+function startChallenge(cycles) {
+  let prev = challengemode;
+  if (challengemode) {
+    select("#traincontainer").hide();
+    aibird.show();
+    playerbird.show();
+  } else {
+    select("#traincontainer").show();
+  }
 
   for (let n = 0; n < cycles; n++) {
     if (counter % 50 == 0) {
@@ -79,9 +158,17 @@ function draw() {
     for (var i = pipes.length - 1; i >= 0; i--) {
       pipes[i].update();
 
-      for (let j = birds.length - 1; j >= 0; j--) {
-        if (pipes[i].hits(birds[j])) {
-          savedBirds.push(birds.splice(j, 1)[0]);
+      if (challengemode) {
+        if (pipes[i].hits(playerbird)) {
+          gameover(false);
+        } else if (pipes[i].hits(aibird)) {
+          gameover(true);
+        }
+      } else {
+        for (let j = birds.length - 1; j >= 0; j--) {
+          if (pipes[i].hits(birds[j])) {
+            savedBirds.push(birds.splice(j, 1)[0]);
+          }
         }
       }
 
@@ -90,70 +177,27 @@ function draw() {
       }
     }
 
-    for (let i = birds.length - 1; i >= 0; i--) {
-      if (birds[i].offScreen()) {
-        savedBirds.push(birds.splice(i, 1)[0]);
+    if (challengemode) {
+      aibird.think(pipes);
+      aibird.update();
+      playerbird.update();
+    } else {
+      for (let i = birds.length - 1; i >= 0; i--) {
+        if (birds[i].offScreen()) {
+          savedBirds.push(birds.splice(i, 1)[0]);
+        }
+      }
+      for (let bird of birds) {
+        bird.think(pipes);
+        bird.update();
+      }
+      if (birds.length == 0) {
+        counter = 0;
+        nextGeneration();
+        pipes = [];
       }
     }
-
-    for (let bird of birds) {
-      bird.think(pipes);
-      bird.update();
-    }
-
-    if (birds.length == 0) {
-      counter = 0;
-      nextGeneration();
-      pipes = [];
-    }
   }
-  background(0);
-
-  // Draw our background image, then move it at the same speed as the pipes
-  image(bgImg, bgX, 0, bgImg.width, height);
-  bgX -= 10 * parallax;
-
-  // this handles the "infinite loop" by checking if the right
-  // edge of the image would be on the screen, if it is draw a
-  // second copy of the image right next to it
-  // once the second image gets to the 0 point, we can reset bgX to
-  // 0 and go back to drawing just one image.
-  if (bgX <= -bgImg.width + width) {
-    image(bgImg, bgX + bgImg.width, 0, bgImg.width, height);
-    if (bgX <= -bgImg.width) {
-      bgX = 0;
-    }
-  }
-
-  let tempHighScore = 0;
-
-  // Which is the best bird?
-  let tempBestBird = null;
-  for (let i = 0; i < birds.length; i++) {
-    let s = birds[i].score;
-    if (s > tempHighScore) {
-      tempHighScore = s;
-      tempBestBird = birds[i];
-    }
-  }
-
-  // Is it the all time high scorer?
-  if (tempHighScore > highScore) {
-    highScore = tempHighScore;
-    bestBird = tempBestBird;
-  }
-  // Update DOM Elements
-  highScoreSpan.html(tempHighScore);
-  allTimeHighScoreSpan.html(highScore);
-
-  for (let bird of birds) {
-    bird.show();
-  }
-  for (let pipe of pipes) {
-    pipe.show();
-  }
-
-  numBirds = birds.length;
 }
 
 function showScores() {
@@ -163,34 +207,66 @@ function showScores() {
   text("current birds: " + numBirds, 1, 96);
 }
 
-function gameover() {
-  //   textSize(64);
-  //   textAlign(CENTER, CENTER);
-  //   text("GAMEOVER", width / 2, height / 2);
-  //   textAlign(LEFT, BASELINE);
-  //   maxScore = max(score, maxScore);
-  //   isOver = true;
-  //   noLoop();
+function gameover(playerWins) {
+  textSize(64);
+  textAlign(CENTER, CENTER);
+  // text("GAME OVER", width / 2, height / 2);
+  if (playerWins) {
+    text("You Win!", width / 2, height / 2);
+  } else {
+    text("You Lose...", width / 2, height / 2);
+  }
+  textAlign(LEFT, BASELINE);
+  maxScore = max(score, maxScore);
+  isOver = true;
+  noLoop();
 }
 
 function reset() {
   isOver = false;
   score = 0;
   bgX = 0;
-  // pipes = [];
-  // bird = new Bird();
-  // pipes.push(new Pipe());
+  counter = 0;
+  if (challengeCheckbox.checked()) {
+    pipes = [];
+    playerbird = new Bird(null, true);
+    aibird = new Bird(birdbrain);
+  }
+
   gameoverFrame = frameCount - 1;
   loop();
 }
 
-// function keyPressed() {
-//   if (key === " ") {
-//     bird.up();
-//     if (isOver) reset(); //you can just call reset() in Machinelearning if you die, because you cant simulate keyPress with code.
-//   }
-// }
+function keyPressed() {
+  if (key === " " && challengeCheckbox.checked()) {
+    playerbird.up();
+    if (isOver) reset(); //you can just call reset() in Machinelearning if you die, because you cant simulate keyPress with code.
+  }
+  if (key === "S" && !challengeCheckbox.checked()) {
+    let bird = birds[0];
+    console.log("SAVED BIRD WEIGHTS");
+    saveJSON(bird.brain, "bird.json");
+  }
+}
 
 function touchStarted() {
   if (isOver) reset();
+}
+
+function drawBackground() {
+  for (let y = 0; y < height; y++) {
+    const n = map(y, 0, height, 0, 1);
+    const newc = lerpColor(c1, c2, n);
+    stroke(newc);
+    line(0, y, width, y);
+  }
+}
+
+function drawSinusoidalPattern() {
+  for (let x = 0; x < width; x++) {
+    const y = map(sin(radians(x + scroll)), -1, 1, 200, 600);
+    noStroke();
+    fill(255, 255, 255);
+    ellipse(x, y, 15, 15);
+  }
 }

@@ -7,7 +7,7 @@
 /* exported Bird */
 
 class Bird {
-  constructor(brain) {
+  constructor(brain, playerControlled = false) {
     this.y = height / 2;
     this.x = 64;
 
@@ -15,30 +15,48 @@ class Bird {
     this.lift = -12;
     this.velocity = 0;
 
-    this.icon = birdSprite;
+    // this.icon = birdSprite;
     this.width = 64;
     this.height = 64;
 
-    // this.pipe_score = 0;
+    this.playerControl = playerControlled;
 
+    // this.pipe_score = 0;
+    if (playerControlled === false) {
+      if (brain) {
+        this.brain = brain.copy();
+      } else {
+        this.brain = new NeuralNetwork(5, 8, 2);
+      }
+    }
     this.score = 0;
     this.fitness = 0;
-    if (brain) {
-      this.brain = brain.copy();
-    } else {
-      this.brain = new NeuralNetwork(5, 8, 2);
-    }
+    this.up_sprite = loadImage("./graphics/owl_up.png");
+    this.down_sprite = loadImage("./graphics/owl_down.png");
+    this.robot_sprite = loadImage("./graphics/robot-bird.png");
   }
 
+  // show() {
+  //   // draw the icon CENTERED around the X and Y coords of the bird object
+  //   image(
+  //     this.icon,
+  //     this.x - this.width / 2,
+  //     this.y - this.height / 2,
+  //     this.width,
+  //     this.height
+  //   );
+
+  // }
   show() {
-    // draw the icon CENTERED around the X and Y coords of the bird object
-    image(
-      this.icon,
-      this.x - this.width / 2,
-      this.y - this.height / 2,
-      this.width,
-      this.height
-    );
+    if (this.playerControl == true) {
+      if (this.velocity > 0) {
+        image(this.down_sprite, this.x, this.y, 55, 55);
+      } else {
+        image(this.up_sprite, this.x, this.y, 55, 55);
+      }
+    } else {
+      image(this.robot_sprite, this.x, this.y, 55, 55);
+    }
   }
 
   up() {
