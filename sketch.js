@@ -148,6 +148,8 @@ function startChallenge(cycles) {
     select("#traincontainer").show();
   }
 
+  
+
   for (let n = 0; n < cycles; n++) {
     if (counter % 50 == 0) {
       pipes.push(new Pipe());
@@ -233,6 +235,7 @@ function reset() {
   score = 0;
   bgX = 0;
   counter = 0;
+  pipes = [];
   if (challengeCheckbox.checked()) {
     pipes = [];
     playerbird = new Bird(null, true);
