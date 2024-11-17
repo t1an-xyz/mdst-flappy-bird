@@ -2,8 +2,44 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: #595959;
+  background: rgb(194,124,217);
+  background: linear-gradient(0deg, rgba(194,124,217,1) 0%, rgba(28,173,203,1) 56%, rgba(71,203,130,1) 100%); 
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Source Code Pro", monospace;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 canvas {
   display: block;
+  margin: 20px;
+  border: 10px solid #333;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(254, 254, 254, 0.60);
+  max-width: 1000px;
+  min-height: 600px;
+  flex-basis: 1000px;
+  flex-shrink: 1;
+  flex-grow: 0;
+  flex-wrap: wrap;
+}
+.content {
+  max-width: 300px;
+  flex: 1;
+  padding: 20px;
+  flex-basis: 300px;
+}
+.speed-slider-container {
+  display: flex;
+}
+span#speed {
+  margin-left: 10px;
+  text-align: right;
 }
