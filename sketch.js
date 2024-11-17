@@ -181,6 +181,10 @@ function startChallenge(cycles) {
 
       if (pipes[i].offscreen()) {
         pipes.splice(i, 1);
+        score++;
+        if (score > maxScore) {
+          maxScore = score;
+        }
       }
     }
 
