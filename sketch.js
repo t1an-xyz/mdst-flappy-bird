@@ -140,7 +140,6 @@ function draw() {
 }
 
 function startChallenge(cycles) {
-  let prev = challengemode;
   if (challengemode) {
     select("#traincontainer").hide();
     aibird.show();
@@ -178,6 +177,11 @@ function startChallenge(cycles) {
     }
 
     if (challengemode) {
+      if (playerbird.offScreen()) {
+        gameover(false);
+      } else if (aibird.offScreen()) {
+        gameover(true);
+      }
       aibird.think(pipes);
       aibird.update();
       playerbird.update();
@@ -213,8 +217,10 @@ function gameover(playerWins) {
   // text("GAME OVER", width / 2, height / 2);
   if (playerWins) {
     text("You Win!", width / 2, height / 2);
+    console.log("YOU WIN");
   } else {
     text("You Lose...", width / 2, height / 2);
+    console.log("YOU LOSE");
   }
   textAlign(LEFT, BASELINE);
   maxScore = max(score, maxScore);

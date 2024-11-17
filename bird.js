@@ -15,13 +15,11 @@ class Bird {
     this.lift = -12;
     this.velocity = 0;
 
-    // this.icon = birdSprite;
     this.width = 64;
     this.height = 64;
 
     this.playerControl = playerControlled;
 
-    // this.pipe_score = 0;
     if (playerControlled === false) {
       if (brain) {
         this.brain = brain.copy();
@@ -36,17 +34,6 @@ class Bird {
     this.robot_sprite = loadImage("./graphics/robot-bird.png");
   }
 
-  // show() {
-  //   // draw the icon CENTERED around the X and Y coords of the bird object
-  //   image(
-  //     this.icon,
-  //     this.x - this.width / 2,
-  //     this.y - this.height / 2,
-  //     this.width,
-  //     this.height
-  //   );
-
-  // }
   show() {
     if (this.playerControl == true) {
       if (this.velocity > 0) {
