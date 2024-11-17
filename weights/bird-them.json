@@ -1,91 +1,137 @@
-// Daniel Shiffman
-// http://codingtra.in
-// http://patreon.com/codingtrain
-// Code for: https://youtu.be/cXgA1d_E-jY
-
-// Class is exported (eslint flag)
-/* exported Bird */
-
-class Bird {
-  constructor(brain, playerControlled = false) {
-    this.y = height / 2;
-    this.x = 64;
-
-    this.gravity = 0.8;
-    this.lift = -12;
-    this.velocity = 0;
-
-    this.width = 64;
-    this.height = 64;
-
-    this.playerControl = playerControlled;
-
-    if (playerControlled === false) {
-      if (brain) {
-        this.brain = brain.copy();
-      } else {
-        this.brain = new NeuralNetwork(5, 8, 2);
-      }
-    }
-    this.score = 0;
-    this.fitness = 0;
-    this.up_sprite = loadImage("./graphics/owl_up.png");
-    this.down_sprite = loadImage("./graphics/owl_down.png");
-    this.robot_sprite = loadImage("./graphics/robot-bird.png");
-  }
-
-  show() {
-    if (this.playerControl == true) {
-      if (this.velocity > 0) {
-        image(this.down_sprite, this.x, this.y, 55, 55);
-      } else {
-        image(this.up_sprite, this.x, this.y, 55, 55);
-      }
-    } else {
-      image(this.robot_sprite, this.x, this.y, 55, 55);
-    }
-  }
-
-  up() {
-    this.velocity = this.lift;
-  }
-
-  think(pipes) {
-    // FInd the closest pipe
-    let closest = null;
-    let closestD = Infinity;
-    for (let i = 0; i < pipes.length; ++i) {
-      let d = pipes[i].x + pipes[i].w - this.x;
-      if (d < closestD && d > 0) {
-        closest = pipes[i];
-        closestD = d;
-      }
-    }
-    let inputs = [];
-    inputs[0] = this.y / height;
-    inputs[1] = closest.top / height;
-    inputs[2] = closest.bottom / height;
-    inputs[3] = closest.x / width;
-    inputs[4] = this.velocity / 10;
-
-    let output = this.brain.predict(inputs);
-    if (output[0] > output[1]) {
-      this.up();
-    }
-  }
-
-  update() {
-    this.score++;
-
-    this.velocity += this.gravity;
-    this.y += this.velocity;
-  }
-
-  mutate() {
-    this.brain.mutate(0.02);
-  }
-
-  offScreen() {
-    return this.y > height || this.y < 0;
-  }
+{
+  "input_nodes": 5,
+  "hidden_nodes": 8,
+  "output_nodes": 2,
+  "weights_ih": {
+    "rows": 8,
+    "cols": 5,
+    "data": [
+      [
+        0.7878307442215964,
+        -0.7115434844953883,
+        0.7807970753607187,
+        0.878141229779527,
+        0.7701910027157308
+      ],
+      [
+        0.3668438420889506,
+        -0.9913355553277099,
+        0.46051812530742087,
+        0.836026168444417,
+        -0.7273334716668083
+      ],
+      [
+        0.703775492507932,
+        -0.22320452650499778,
+        0.7885518417815414,
+        0.7220621296886449,
+        0.099892768958604
+      ],
+      [
+        0.6708339774982244,
+        -0.14250990545304498,
+        0.5902923811698171,
+        0.19809651340236428,
+        0.9499055432501409
+      ],
+      [
+        -0.566820775838162,
+        0.38315313511293936,
+        0.48987127693998933,
+        0.6736645477857162,
+        -0.6717051807833098
+      ],
+      [
+        0.22185556081954827,
+        -0.7161407483245568,
+        -0.1158117325931225,
+        -0.39825992978795166,
+        0.9337538021618679
+      ],
+      [
+        0.929699462995118,
+        0.5887065776666174,
+        0.7751388967753703,
+        0.009317546961834733,
+        -0.24157265256753435
+      ],
+      [
+        0.08251644424751903,
+        -0.3343298732006508,
+        0.900843066299658,
+        0.4848556627510643,
+        0.23947108779210158
+      ]
+    ]
+  },
+  "weights_ho": {
+    "rows": 2,
+    "cols": 8,
+    "data": [
+      [
+        0.6313410455021939,
+        0.4994808436329412,
+        -0.7026109383505386,
+        0.7806903840890904,
+        -0.2378667702474364,
+        0.3759495281200058,
+        0.6971096402486514,
+        0.5615162298720504
+      ],
+      [
+        0.35039281139779077,
+        0.3007217649984357,
+        0.9083680432501835,
+        0.6150519469390432,
+        0.1370241505229104,
+        0.36115284458297325,
+        -0.9057013641624154,
+        -0.6372694758576904
+      ]
+    ]
+  },
+  "bias_h": {
+    "rows": 8,
+    "cols": 1,
+    "data": [
+      [
+        1.1044247375267702
+      ],
+      [
+        0.41647873246145006
+      ],
+      [
+        0.9443805510047457
+      ],
+      [
+        0.5812140354792779
+      ],
+      [
+        0.7310789953606402
+      ],
+      [
+        -0.07633816539086791
+      ],
+      [
+        -0.567932057088953
+      ],
+      [
+        -0.5577035939328214
+      ]
+    ]
+  },
+  "bias_o": {
+    "rows": 2,
+    "cols": 1,
+    "data": [
+      [
+        -0.01745830724366826
+      ],
+      [
+        0.39641473373826597
+      ]
+    ]
+  },
+  "learning_rate": 0.1,
+  "activation_function": {}
 }
