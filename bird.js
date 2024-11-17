@@ -11,7 +11,7 @@ class Bird {
     this.y = height / 2;
     this.x = 64;
 
-    this.gravity = 0.6;
+    this.gravity = 0.8;
     this.lift = -12;
     this.velocity = 0;
 
@@ -47,7 +47,7 @@ class Bird {
   }
 
   up() {
-    this.velocity += this.lift;
+    this.velocity = this.lift;
   }
 
   think(pipes) {
@@ -82,7 +82,7 @@ class Bird {
   }
 
   mutate() {
-    this.brain.mutate(0.1);
+    this.brain.mutate(0.01);
   }
 
   offScreen() {
