@@ -14,6 +14,7 @@ var score = 0;
 var maxScore = 0;
 var gameoverFrame = 0;
 var isOver = false;
+let playerWon = false;
 
 let numBirds = 0;
 let counter = 0;
@@ -122,8 +123,7 @@ function draw() {
     numBirds = birds.length;
   }
 
-  drawBackground();
-  drawSinusoidalPattern();
+  drawCanvas();
 
   scroll += 2;
 
@@ -137,6 +137,14 @@ function draw() {
   for (let pipe of pipes) {
     pipe.show();
   }
+}
+
+function drawCanvas() {
+  drawBackground();
+  drawSinusoidalPattern();
+
+  drawGameOver();
+  showScores();
 }
 
 function startChallenge(cycles) {
@@ -175,6 +183,10 @@ function startChallenge(cycles) {
 
       if (pipes[i].offscreen()) {
         pipes.splice(i, 1);
+        score++;
+        if (score > maxScore) {
+          maxScore = score;
+        }
       }
     }
 
@@ -207,24 +219,33 @@ function startChallenge(cycles) {
 }
 
 function showScores() {
-  textSize(32);
-  text("score: " + score, 1, 32);
-  text("record: " + maxScore, 1, 64);
-  text("current birds: " + numBirds, 1, 96);
+  if (challengemode) {
+    textSize(32);
+    text("score: " + score, 60, 32);
+    text("record: " + maxScore, 64, 64);
+  }
+}
+
+function drawGameOver() {
+  textSize(64);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  stroke(0);
+  strokeWeight(5);
+
+  if (isOver && playerWon) {
+    console.log("PLAYER WON");
+    text("YOU WIN!!!", width / 2, height / 2);
+  } else if (isOver) {
+    console.log("PLAYER LOST");
+    text("YOU LOSE :(", width / 2, height / 2);
+  }
+
+  noStroke();
 }
 
 function gameover(playerWins) {
-  textSize(64);
-  textAlign(CENTER, CENTER);
-  // text("GAME OVER", width / 2, height / 2);
-  if (playerWins) {
-    text("You Win!", width / 2, height / 2);
-    console.log("YOU WIN");
-  } else {
-    text("You Lose...", width / 2, height / 2);
-    console.log("YOU LOSE");
-  }
-  textAlign(LEFT, BASELINE);
+  playerWon = playerWins;
   maxScore = max(score, maxScore);
   isOver = true;
   noLoop();
