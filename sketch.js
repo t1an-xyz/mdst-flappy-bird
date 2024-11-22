@@ -126,6 +126,11 @@ function draw() {
   drawCanvas();
 
   scroll += 2;
+}
+
+function drawCanvas() {
+  drawBackground();
+  drawSinusoidalPattern();
 
   for (let bird of birds) {
     bird.show();
@@ -137,11 +142,6 @@ function draw() {
   for (let pipe of pipes) {
     pipe.show();
   }
-}
-
-function drawCanvas() {
-  drawBackground();
-  drawSinusoidalPattern();
 
   drawGameOver();
   showScores();
@@ -155,8 +155,6 @@ function startChallenge(cycles) {
   } else {
     select("#traincontainer").show();
   }
-
-  
 
   for (let n = 0; n < cycles; n++) {
     if (counter % 50 == 0) {
@@ -222,7 +220,7 @@ function showScores() {
   if (challengemode) {
     textSize(32);
     text("score: " + score, 60, 32);
-    text("record: " + maxScore, 64, 64);
+    text("record: " + maxScore, 70, 64);
   }
 }
 

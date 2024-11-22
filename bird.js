@@ -15,8 +15,8 @@ class Bird {
     this.lift = -12;
     this.velocity = 0;
 
-    this.width = 64;
-    this.height = 64;
+    this.width = 55;
+    this.height = 55;
 
     this.playerControl = playerControlled;
 
