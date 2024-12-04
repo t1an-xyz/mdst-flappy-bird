@@ -82,7 +82,7 @@ class Bird {
   }
 
   mutate() {
-    this.brain.mutate(0.02);
+    this.brain.mutate(0.08);
   }
 
   offScreen() {
